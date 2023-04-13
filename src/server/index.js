@@ -60,7 +60,8 @@ app.delete('/books/:id', async (req, res, next) => {
   }
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
+  sequelize.sync({force: false});
   console.log(`listening at localhost:${PORT}...`);
 });
