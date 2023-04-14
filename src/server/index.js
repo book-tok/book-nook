@@ -51,8 +51,9 @@ app.put('/books/:id', async (req, res, next) => {
 
 app.delete('/books/:id', async (req, res, next) => {
   try{
-    const books = await Book.findAll();
     const book = await Book.findByPk(req.params.id);
+    book.destroy()
+    const books = await Book.findAll();
     res.send(books);
   } catch (error) {
     console.log(error);
