@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const {Book, User, sequelize, Op} = require('../db');
 const bcrypt = require('bcrypt');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
@@ -62,6 +66,24 @@ app.delete('/books/:id', async (req, res, next) => {
   }
 });
 
+const setUser = (req, res, next) => {
+  try {
+    const auth = req.header('Authorization');
+    if (!auth){
+      next()
+    } else {
+      const [, token] = auth.split(" ");
+      const payload = jwt.verify(token, JWT_SECRET);
+      req.user = payload;
+      next();
+    }
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(401)
+    next(error);
+  }
+};
+
 app.get('/users', async (req, res, next) => {
   const { name } = req.query;
   const where = {};
@@ -82,7 +104,8 @@ app.post('/register', async (req, res, next) => {
     const { name, username, password } = req.body;
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name: name, username: username, password: hashPassword });
-    res.status(201).send({ message: `Thank you for registering! ${user.name}`});
+    const token = jwt.sign(user, JWT_SECERT);
+    res.status(201).send({token});
   } catch (error) {
     console.log(error);
     next(error);
@@ -95,7 +118,8 @@ app.post('/login', async (req, res, next) => {
     const findUser = await User.findOne({ where: {username: username} });
     const verify = await bcrypt.compare(password, findUser.password)
     if (verify){
-      res.status(200).send({ message: `Login Successful! Welcome, ${findUser.name}!!`});
+      const token = jwt.sign(user, JWT_SECERT);
+      res.status(200).send({token});
     } else {
       res.status(404).send({ message: 'Please Try Again.'});
     }
@@ -105,7 +129,7 @@ app.post('/login', async (req, res, next) => {
   }
 });
 
-app.put('/users/:id', async (req, res, next) => {
+app.put('/users/:id', setUser, async (req, res, next) => {
   try{
     const { name, username, password } = req.body;
     const user = await User.findByPk(req.params.id);
@@ -128,6 +152,9 @@ app.delete('/users/:id', async (req, res, next) => {
     next(error);
   }
 });
+
+const JWT_SECERT = process.env.JWT_SECERT;
+const user = await User.findByPk(req.params.id);
 
 // const register = async (name, username, password) => {
 //   const hashPassword = await bcrypt.hash(password, 10)
