@@ -26,7 +26,8 @@ const books = [
 
 const users = [
   {name: 'Jane Doe', username: 'janedoe001', password: 'password123'},
-  {name: 'John Doe', username: 'johnnyboy', password: 'password123456'}
+  {name: 'John Doe', username: 'johnnyboy', password: 'password123456'},
+  {name: 'Tigger', username: 'tiggersarethebounciest', password: 'abc123'}
 ]
 
 module.exports = {

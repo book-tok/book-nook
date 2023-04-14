@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const {Book, User, sequelize, Op} = require('../db');
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -76,11 +77,28 @@ app.get('/users', async (req, res, next) => {
   }
 });
 
-app.post('/users', async (req, res, next) => {
+app.post('/register', async (req, res, next) => {
   try{
     const { name, username, password } = req.body;
-    const user = await User.create({ name, username, password });
-    res.send(user);
+    const hashPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ name: name, username: username, password: hashPassword });
+    res.status(201).send({ message: `Thank you for registering! ${user.name}`});
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+app.post('/login', async (req, res, next) => {
+  try{
+    const { username, password } = req.body;
+    const findUser = await User.findOne({ where: {username: username} });
+    const verify = await bcrypt.compare(password, findUser.password)
+    if (verify){
+      res.status(200).send({ message: `Login Successful! Welcome, ${findUser.name}!!`});
+    } else {
+      res.status(404).send({ message: 'Please Try Again.'});
+    }
   } catch (error) {
     console.log(error);
     next(error);
@@ -111,8 +129,27 @@ app.delete('/users/:id', async (req, res, next) => {
   }
 });
 
+// const register = async (name, username, password) => {
+//   const hashPassword = await bcrypt.hash(password, 10)
+//   await User.create({name: name, username: username, password: hashPassword})
+// };
+
+// const login = async (username, password) => {
+//   const searchUser = await User.findOne({ where: { username: username }})
+//   const verify = await bcrypt.compare(password, searchUser.password)
+//   if (verify){
+//     console.log(`Login Succussful! Welcome, ${searchUser.name}`)
+//   } else {
+//     console.log('Please Try Again.')
+//   }
+// };
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   sequelize.sync({force: false});
   console.log(`listening at localhost:${PORT}...`);
 });
+
+module.exports = {
+  app
+}
