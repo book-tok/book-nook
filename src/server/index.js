@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const {Book, sequelize, Op} = require('../db');
+const {Book, User, sequelize, Op} = require('../db');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -55,6 +55,56 @@ app.delete('/books/:id', async (req, res, next) => {
     book.destroy()
     const books = await Book.findAll();
     res.send(books);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+app.get('/users', async (req, res, next) => {
+  const { name } = req.query;
+  const where = {};
+
+  if (name) where.name = name;
+
+  try {
+    const users = await User.findAll({where});
+    res.send(users)
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+});
+
+app.post('/users', async (req, res, next) => {
+  try{
+    const { name, username, password } = req.body;
+    const user = await User.create({ name, username, password });
+    res.send(user);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+app.put('/users/:id', async (req, res, next) => {
+  try{
+    const { name, username, password } = req.body;
+    const user = await User.findByPk(req.params.id);
+    await user.update({ name, username, password });
+    res.send(user);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+app.delete('/users/:id', async (req, res, next) => {
+  try{
+    const user = await User.findByPk(req.params.id);
+    user.destroy()
+    const users = await User.findAll();
+    res.send(users);
   } catch (error) {
     console.log(error);
     next(error);

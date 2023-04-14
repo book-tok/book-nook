@@ -24,6 +24,12 @@ const books = [
   But all that is about to change when a mysterious letter arrives by owl messenger: a letter with an invitation to an incredible place that Harry - and anyone who reads about him - will find unforgettable.`, rating: 1, feelings: `What is a Harry Potter? I don't get what the big deal is. Was super whomp whomp for me.` }
 ];
 
+const users = [
+  {name: 'Jane Doe', username: 'janedoe001', password: 'password123'},
+  {name: 'John Doe', username: 'johnnyboy', password: 'password123456'}
+]
+
 module.exports = {
-  books
+  books,
+  users
 };
