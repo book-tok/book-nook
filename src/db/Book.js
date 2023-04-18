@@ -7,6 +7,7 @@ const Book = sequelize.define('book', {
   description: Sequelize.STRING,
   rating: Sequelize.NUMBER,
   feelings: Sequelize.STRING,
+  userId: Sequelize.NUMBER,
 });
 
 module.exports = { Book };
